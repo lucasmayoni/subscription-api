@@ -26,7 +26,7 @@ class SubscriptionStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'msisdn' => 'required|string|max:12|exists:subscriber,msisdn',
+            'msisdn' => 'required|string|max:20|exists:subscriber,msisdn',
             'service' => 'required|string|max:255|exists:service,description',
             'insert_date' => 'required|date|date_format:"Y-m-d"'
         ];
@@ -40,7 +40,8 @@ class SubscriptionStoreRequest extends FormRequest
         return [
             'msisdn.required' => 'El campo msisdn es obligatorio',
             'service.required' => 'El campo service es obligatorio',
-            'insert_date.required' => 'La fecha de alta es obligatoria'
+            'insert_date.required' => 'La fecha de alta es obligatoria',
+            'subscription.invalid' => 'Subscripcion invalida'
         ];
     }
 
@@ -53,14 +54,13 @@ class SubscriptionStoreRequest extends FormRequest
         $validator->after(function ($validator) {
 
             if ($this->alreadySubscribed()) {
-                $validator->errors()->add('subscription','El usuario ya se encuentra subscripto al servicio dado');
-            } else {
-                if ($this->disabledService()) {
-                    $validator->errors()->add('service', 'El servicio se encuentra deshabilitado para su subscripcion');
-                }
-                if ($this->blockedUser()) {
-                    $validator->errors()->add('msisdn', 'El numero se encuentra bloqueado');
-                }
+                $validator->errors()->add('subscription', 'El usuario ya se encuentra subscripto al servicio dado');
+            }
+            if ($this->disabledService()) {
+                $validator->errors()->add('service', 'El servicio se encuentra deshabilitado para su subscripcion');
+            }
+            if ($this->blockedUser()) {
+                $validator->errors()->add('msisdn', 'El numero se encuentra bloqueado');
             }
         });
     }
