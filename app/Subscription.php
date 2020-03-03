@@ -34,4 +34,33 @@ class Subscription extends Model
         ->where('service.description','=', $service)
         ->where('subscriber.msisdn','=',$msisdn)->firstOrFail();
     }
+
+    /**
+     * @param $date
+     * @return int
+     */
+    public function totalActiveSubscriptions($date)
+    {
+        return $this->query()->where('insert_date','<=', $date)->count();
+    }
+
+    /**
+     * @param $date
+     * @return int
+     */
+    public function totalNewSubscriptions($date)
+    {
+        return $this->query()->where('insert_date','=', $date)->count();
+    }
+
+    /**
+     * @param $date
+     * @return int
+     */
+    public function totalCancelledSubscriptions($date)
+    {
+        $all = $this->withTrashed()/*->where('deleted_at','>=', $date." 00:00:00")
+                             ->where('deleted_at','<=', $date." 23:59:59")*/
+                            ->get();
+    }
 }
