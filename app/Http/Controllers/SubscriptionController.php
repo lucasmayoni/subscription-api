@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SubscriptionDeleteRequest;
 use App\Http\Requests\SubscriptionStoreRequest;
 use App\Service;
 use App\Subscriber;
@@ -126,11 +127,43 @@ class SubscriptionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @param SubscriptionDeleteRequest $request
+     * @return array
      */
     public function destroy($id, SubscriptionDeleteRequest $request)
     {
 
+    }
+
+    /**
+     * @param SubscriptionDeleteRequest $request
+     * @return array
+     */
+    public function deleteSubscription(SubscriptionDeleteRequest $request)
+    {
+        try {
+
+            $fields = $request->all();
+            $subscription = $this->subscription->findWithParams($fields['msisdn'], $fields['service']);
+            $subscription->delete();
+
+            $message = [
+                'success' => true,
+                'code' => 200,
+                'message' => 'MSISDN successfully unsubscribed',
+                'data' => []
+            ];
+
+        } catch (\Exception $e) {
+            $message = [
+                'success' => false,
+                'code' => $e->getCode(),
+                "message" => trans('errors.internal-server-error'),
+                "errors" => $e->getMessage(),
+                'data' => []
+            ];
+        }
+        return $message;
     }
 }

@@ -16,4 +16,5 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::resource('/subscription','SubscriptionController');
+Route::resource('/subscription','SubscriptionController')->except('destroy');
+Route::delete('/subscription', 'SubscriptionController@deleteSubscription');

@@ -26,4 +26,12 @@ class Subscription extends Model
     {
         return $this->belongsTo(Service::class, 'service_id', 'id');
     }
+    public function findWithParams($msisdn, $service)
+    {
+        return $this->query()->select('subscription.id')
+        ->join('subscriber','subscriber.id','=', 'subscription.subscriber_id')
+        ->join('service', 'service.id','=','subscription.service_id')
+        ->where('service.description','=', $service)
+        ->where('subscriber.msisdn','=',$msisdn)->firstOrFail();
+    }
 }

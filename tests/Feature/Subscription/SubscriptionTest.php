@@ -111,4 +111,40 @@ class SubscriptionTest extends TestCase
         $response = $this->postJson( '/api/subscription', $subscription);
         $response->assertStatus(422);
     }
+
+    /**
+     * @test
+     */
+    public function caseFive()
+    {
+        $service = factory(Service::class)->create(['is_disabled' => 0]);
+        $subscriber = factory(Subscriber::class)->create(['blocked' =>0]);
+        $subscription = [
+            'msisdn' => $subscriber->msisdn,
+            'service' => $service->description,
+            'insert_date' => date('Y-m-d')
+        ];
+        $response = $this->json('POST', '/api/subscription', $subscription);
+        $response->assertStatus(200);
+        $data =json_decode($response->getContent());
+        $response->assertJson([
+            'success' => true,
+            'code' => 200,
+            'message' => 'MSISDN successfully subscribed',
+            'data' => [
+                'id' => $data->data->id,
+            ]
+        ]);
+
+        $deleted = $this->json('DELETE','/api/subscription', $subscription);
+        $deleted->assertStatus(200);
+        $deleted->assertJson([
+            'success' => true,
+            'code' => 200,
+            'message' => 'MSISDN successfully unsubscribed',
+            'data' => []
+        ]);
+    }
+
+
 }
