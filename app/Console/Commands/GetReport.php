@@ -43,18 +43,25 @@ class GetReport extends Command
             $date = $this->input->getOption('date');
             $logger->info(__METHOD__ . ' Call with...', compact('date'));
             $this->output->title("Get Subscription Data - Started...");
-            $this->info("Get Subscription info...");
+            $this->info("Get Subscription info => ". $date[0]);
 
             $loader = app()->make(\App\Services\ReportDataLoader::class);
+
             $totalActiveSubscriptions = $loader->totalActiveSubscriptions($date);
             $totalNewSubscriptions = $loader->totalNewSubscriptions($date);
             $totalCancelledSubscriptions = $loader->totalCancelledSubscriptions($date);
+
             $this->info("TotalSubscriptions: ". $totalActiveSubscriptions);
             $this->info("TotalNewSubscriptions: ". $totalNewSubscriptions);
             $this->info("TotalCancelledSubscriptions: ". $totalCancelledSubscriptions);
 
+            $id = $loader->generateReport($date, $totalActiveSubscriptions, $totalNewSubscriptions, $totalCancelledSubscriptions);
+            if ($id) {
+                $this->info("Get Subscription succesfully registered with ID: ".$id);
+            }
+            $this->output->title("Get Subscription Data - Ended...");
         } catch (\Exception $ex) {
-
+            $logger->info(__FILE__, compact('ex'));
         }
     }
 }

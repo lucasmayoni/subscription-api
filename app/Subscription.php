@@ -2,8 +2,10 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
 class Subscription extends Model
 {
@@ -41,7 +43,7 @@ class Subscription extends Model
      */
     public function totalActiveSubscriptions($date)
     {
-        return $this->query()->where('insert_date','<=', $date)->count();
+        return $this->query()->where('insert_date','<=', $date[0])->count();
     }
 
     /**
@@ -50,7 +52,7 @@ class Subscription extends Model
      */
     public function totalNewSubscriptions($date)
     {
-        return $this->query()->where('insert_date','=', $date)->count();
+        return $this->query()->where('insert_date','=', $date[0])->count();
     }
 
     /**
@@ -59,8 +61,13 @@ class Subscription extends Model
      */
     public function totalCancelledSubscriptions($date)
     {
-        $all = $this->withTrashed()/*->where('deleted_at','>=', $date." 00:00:00")
-                             ->where('deleted_at','<=', $date." 23:59:59")*/
-                            ->get();
+        $dateFrom = Carbon::createFromFormat('Y-m-d', $date[0])->startOfDay();
+        $dateTo = Carbon::createFromFormat('Y-m-d', $date[0])->endOfDay();
+        Log::info(__METHOD__, compact('dateFrom', 'dateTo'));
+        $all = $this->withTrashed()->get();
+        return $all->where('deleted_at', '>=', $dateFrom)
+                    ->where('deleted_at','<=', $dateTo)->count();
+
+
     }
 }
